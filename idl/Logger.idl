@@ -1,0 +1,28 @@
+// Grupo T1-__:
+// - <Nome Sobrenome 1>
+// - <Nome Sobrenome 2>
+// - <Nome Sobrenome 3>
+
+interface Logger
+{
+    enum Severidade { DEBUG, WARNING, ERROR, CRITICAL };
+
+    exception NaoEncontrado
+    {
+        string mensagem;
+    };
+
+    // Notificação assíncrona de um evento ocorrido em um cliente remoto.
+    oneway void log(
+        in Severidade     severidade,
+        in string         endereco,
+        in unsigned short pid,
+        in unsigned long  hora,
+        in string         msg
+    );
+
+    // Retorna o endereço de origem do último evento recebido com a
+    // severidade informada. Lança NaoEncontrado se nenhum evento com
+    // essa severidade tiver sido recebido ainda.
+    string locate(in Severidade severidade) raises (NaoEncontrado);
+};

@@ -1,0 +1,8 @@
+bin/
+*.o
+idl/Logger.hh
+idl/LoggerSK.cc
+idl/LoggerDynSK.cc
+log.*
+*.dat
+*.bak
