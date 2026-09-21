@@ -14,17 +14,17 @@ public:
     virtual ~Logger_i();
 
     void log(
-        Logger::Severidade severidade,
+        Logger::TipoSeveridade severidade,
         const char* endereco,
         CORBA::UShort pid,
         CORBA::ULong hora,
         const char* msg
     );
 
-    char* locate(Logger::Severidade severidade);
+    char* locate(Logger::TipoSeveridade severidade);
 
 private:
-    std::map<Logger::Severidade, std::string> ultimoEndereco_;
+    std::map<Logger::TipoSeveridade, std::string> ultimoEndereco_;
     std::mutex mutex_;
 };
 

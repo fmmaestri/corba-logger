@@ -5,7 +5,7 @@
 
 interface Logger
 {
-    enum Severidade { DEBUG, WARNING, ERROR, CRITICAL };
+    enum TipoSeveridade { DEBUG, WARNING, ERROR, CRITICAL };
 
     exception NaoEncontrado
     {
@@ -14,7 +14,7 @@ interface Logger
 
     // Notificação assíncrona de um evento ocorrido em um cliente remoto.
     oneway void log(
-        in Severidade     sev,
+        in TipoSeveridade severidade,
         in string         endereco,
         in unsigned short pid,
         in unsigned long  hora,
@@ -24,5 +24,5 @@ interface Logger
     // Retorna o endereço de origem do último evento recebido com a
     // severidade informada. Lança NaoEncontrado se nenhum evento com
     // essa severidade tiver sido recebido ainda.
-    string locate(in Severidade sev) raises (NaoEncontrado);
+    string locate(in TipoSeveridade severidade) raises (NaoEncontrado);
 };

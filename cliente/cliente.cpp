@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
         //    eventos recebidos (deve lançar Logger::NaoEncontrado).
         std::cout << "\nConsultando o ultimo endereco por severidade:" << std::endl;
 
-        struct { Logger::Severidade valor; const char* nome; } severidades[] = {
+        struct { Logger::TipoSeveridade valor; const char* nome; } severidades[] = {
             { Logger::DEBUG,    "DEBUG"    },
             { Logger::WARNING,  "WARNING"  },
             { Logger::ERROR,    "ERROR"    },

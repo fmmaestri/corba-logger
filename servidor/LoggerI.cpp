@@ -2,7 +2,7 @@
 #include <iostream>
 #include <ctime>
 
-static const char* severidadeParaTexto(Logger::Severidade s)
+static const char* severidadeParaTexto(Logger::TipoSeveridade s)
 {
     switch (s)
     {
@@ -23,7 +23,7 @@ Logger_i::~Logger_i()
 }
 
 void Logger_i::log(
-    Logger::Severidade severidade,
+    Logger::TipoSeveridade severidade,
     const char* endereco,
     CORBA::UShort pid,
     CORBA::ULong hora,
@@ -46,7 +46,7 @@ void Logger_i::log(
               << std::endl;
 }
 
-char* Logger_i::locate(Logger::Severidade severidade)
+char* Logger_i::locate(Logger::TipoSeveridade severidade)
 {
     std::lock_guard<std::mutex> lock(mutex_);
 
