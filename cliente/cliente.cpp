@@ -32,15 +32,20 @@ int main(int argc, char* argv[])
         CORBA::ULong agora = static_cast<CORBA::ULong>(std::time(nullptr));
         CORBA::UShort pid = static_cast<CORBA::UShort>(getpid());
 
-        // 3. Testa log() com dados fictícios, para diferentes severidades e
-        //    endereços de origem (deliberadamente sem nenhum evento WARNING,
-        //    para exercitar a exceção de locate() mais abaixo).
-        std::cout << "Enviando eventos ficticios para o Logger..." << std::endl;
+        // Endereço fictício deste cliente: pode ser passado como argumento
+        // (depois dos argumentos do ORB), simulando clientes espalhados na
+        // rede como no diagrama do enunciado. Se omitido, usa um padrão.
+        const char* meuEndereco = (argc > 1) ? argv[1] : "192.168.1.1:1500";
 
-        logger->log(Logger::DEBUG,    "192.168.1.1:1500", pid, agora,     "Conexao estabelecida");
-        logger->log(Logger::ERROR,    "192.168.1.2:1600", pid, agora + 1, "Falha ao acessar recurso remoto");
-        logger->log(Logger::CRITICAL, "192.168.1.1:1500", pid, agora + 2, "Servico indisponivel");
-        logger->log(Logger::ERROR,    "192.168.1.3:1500", pid, agora + 3, "Timeout na requisicao");
+        // 3. Testa log() com dados fictícios, para diferentes severidades
+        //    (deliberadamente sem nenhum evento WARNING, para exercitar a
+        //    exceção de locate() mais abaixo).
+        std::cout << "Enviando eventos ficticios do endereco " << meuEndereco << "..." << std::endl;
+
+        logger->log(Logger::DEBUG,    meuEndereco, pid, agora,     "Conexao estabelecida");
+        logger->log(Logger::ERROR,    meuEndereco, pid, agora + 1, "Falha ao acessar recurso remoto");
+        logger->log(Logger::CRITICAL, meuEndereco, pid, agora + 2, "Servico indisponivel");
+        logger->log(Logger::ERROR,    meuEndereco, pid, agora + 3, "Timeout na requisicao");
 
         // log() é oneway (assíncrono): aguardamos um instante para dar
         // tempo do servidor processar as chamadas antes de consultar.

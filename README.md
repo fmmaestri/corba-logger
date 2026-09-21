@@ -40,6 +40,16 @@ sudo apt update
 sudo apt install -y build-essential omniorb omniidl omniorb-nameserver libomniorb4-dev libcos4-dev
 ```
 
+O pacote `omniorb-nameserver` já registra um serviço do sistema
+(`omniorb-nameserver.service`) que sobe um `omniNames` automaticamente na
+porta 2809 sempre que o WSL inicia — não é necessário subir um manualmente
+(veja como conferir isso no passo 1 abaixo).
+
+Se não souber a senha do usuário Linux do WSL (comum quando você só usa PIN
+pra entrar no Windows), dá pra rodar `sudo` como root sem senha nenhuma,
+direto do PowerShell/Prompt do Windows:
+`wsl -d Ubuntu -u root -e bash -c "apt update && apt install -y ..."`.
+
 ## Como compilar
 
 Na raiz do projeto:
@@ -49,28 +59,37 @@ make
 ```
 
 Isso gera os stubs/skeletons a partir do `Logger.idl` (`idl/Logger.hh` e
-`idl/LoggerSK.cc`) e os executáveis `bin/cliente` e `bin/servidor`.
+`idl/LoggerSK.cc`) e os executáveis `bin/cliente` e `bin/servidor`. Se mudar
+algo e quiser recompilar do zero: `make clean && make`.
 
 ## Como executar
 
-Em um terminal, inicie o Servidor de Nomes (uma vez só; mantenha rodando):
+### 1. Conferir se o Servidor de Nomes está rodando
+
+```bash
+ps aux | grep omniNames
+```
+
+Se aparecer uma linha com `omniNames -start -always`, já está tudo certo
+(suba direto pro passo 2). Se não aparecer nada, suba um manualmente e
+deixe rodando num terminal:
 
 ```bash
 mkdir -p /tmp/omninames && cd /tmp/omninames
 omniNames -start 2809
 ```
 
-Em outro terminal, exporte a variável que diz a todo processo omniORB onde
-está o Servidor de Nomes (ajuste o host se não for local) e inicie o
-servidor:
+### 2. Rodar o servidor (num terminal, deixe aberto)
 
 ```bash
-export OMNIORB_CONFIG=/dev/null
 cd corba-logger
 ./bin/servidor -ORBInitRef NameService=corbaname::localhost:2809
 ```
 
-Em um terceiro terminal, rode o cliente (mesma referência do NameService):
+Ele publica a referência do Logger no Servidor de Nomes e fica bloqueado
+esperando chamadas — é o comportamento esperado.
+
+### 3. Rodar o cliente (em outro terminal)
 
 ```bash
 cd corba-logger
@@ -80,6 +99,28 @@ cd corba-logger
 O cliente envia eventos fictícios de várias severidades (`log()`) e depois
 consulta `locate()` para cada severidade — incluindo uma que não foi
 enviada, para demonstrar a exceção `Logger::NaoEncontrado`.
+
+### 4. Simulando vários clientes espalhados na rede
+
+O `cliente.cpp` aceita, como argumento extra (depois dos argumentos do
+ORB), o endereço fictício que aquele "cliente" vai usar nas chamadas de
+`log()` — simulando o diagrama do enunciado (três clientes em máquinas
+diferentes). Basta abrir um terminal por cliente e rodar, por exemplo:
+
+```bash
+./bin/cliente -ORBInitRef NameService=corbaname::localhost:2809 192.168.1.1:1500
+```
+```bash
+./bin/cliente -ORBInitRef NameService=corbaname::localhost:2809 192.168.1.2:1600
+```
+```bash
+./bin/cliente -ORBInitRef NameService=corbaname::localhost:2809 192.168.1.3:1500
+```
+
+Se rodar os três ao mesmo tempo, o terminal do servidor (passo 2) mostra os
+eventos dos três clientes chegando intercalados — dá pra ver a concorrência
+acontecendo de verdade. Se nenhum endereço for passado, o cliente usa
+`192.168.1.1:1500` como padrão.
 
 ### Simplificando os parâmetros do ORB
 
