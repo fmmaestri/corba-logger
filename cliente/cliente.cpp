@@ -1,6 +1,6 @@
 #include "Logger.hh"
 #include <omniORB4/CORBA.h>
-#include <omniORB4/CosNaming.hh>
+#include <omniORB4/Naming.hh>
 #include <iostream>
 #include <ctime>
 #include <unistd.h>

@@ -1,6 +1,6 @@
 #include "LoggerI.h"
 #include <omniORB4/CORBA.h>
-#include <omniORB4/CosNaming.hh>
+#include <omniORB4/Naming.hh>
 #include <iostream>
 
 int main(int argc, char* argv[])
