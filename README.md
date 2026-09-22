@@ -4,6 +4,33 @@ Sistema cliente/servidor CORBA em que o servidor (`Logger`) mantém o
 registro de eventos ocorridos em clientes espalhados na rede, conforme o
 enunciado da atividade.
 
+## Como obter o projeto
+
+Todo o trabalho (compilar, rodar) acontece dentro do **WSL** (Linux dentro do
+Windows), não no Windows nativo.
+
+1. **Se ainda não tiver o WSL com Ubuntu instalado**, abra o PowerShell (não
+   precisa ser como administrador) e rode:
+   ```powershell
+   wsl --install -d Ubuntu
+   ```
+   Reinicie o computador se for pedido, e na primeira vez que abrir o Ubuntu
+   ele vai pedir pra você criar um usuário e senha Linux (podem ser
+   diferentes da sua conta do Windows — guarde essa senha, ou veja a dica
+   sobre rodar como `root` sem senha mais abaixo).
+
+2. **Abra um terminal Ubuntu** (procure "Ubuntu" no menu iniciar, ou rode
+   `wsl` no PowerShell/Prompt) e clone o repositório:
+   ```bash
+   git clone https://github.com/fmmaestri/corba-logger.git
+   cd corba-logger
+   ```
+   Se der erro de `git: command not found`, instale com
+   `sudo apt update && sudo apt install -y git` e tente de novo.
+
+Todos os comandos das seções abaixo (`make`, `./bin/servidor`, etc.) devem
+ser rodados de dentro dessa pasta, dentro do terminal Ubuntu/WSL.
+
 ## Sobre a implementação CORBA usada
 
 Os slides da disciplina usam **ACE/TAO** (`tao_idl`, `tao_cosnaming`). Esse
@@ -131,8 +158,10 @@ Para não repetir `-ORBInitRef` toda vez, pode-se criar `/etc/omniORB.cfg`
 InitRef = NameService=corbaname::localhost:2809
 ```
 
-## Antes de entregar
+## Entrega
 
-- Preencha os nomes do grupo no comentário no início de [`idl/Logger.idl`](idl/Logger.idl).
-- O enunciado pede o envio de `Logger.idl` e `LoggerI.cpp` (também é
-  necessário `LoggerI.h`, incluído junto).
+O enunciado pede o envio de [`Logger.idl`](idl/Logger.idl) e
+[`LoggerI.cpp`](servidor/LoggerI.cpp) (mande também
+[`LoggerI.h`](servidor/LoggerI.h) — sem ele o `.cpp` não compila sozinho).
+Os nomes do grupo já estão preenchidos no comentário no início do
+`Logger.idl`.
