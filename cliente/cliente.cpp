@@ -1,9 +1,9 @@
-#include "Logger.hh"
+#include "Logger.hh"            // só o stub: o cliente não implementa o Logger
 #include <omniORB4/CORBA.h>
 #include <omniORB4/Naming.hh>
 #include <iostream>
 #include <ctime>
-#include <unistd.h>
+#include <unistd.h>              // sleep(), getpid()
 
 int main(int argc, char* argv[])
 {
@@ -11,11 +11,12 @@ int main(int argc, char* argv[])
     {
         CORBA::ORB_var orb = CORBA::ORB_init(argc, argv);
 
-        // 1. Obtém referência para o Servidor de Nomes
+        // 1. Obtém referência para o Servidor de Nomes.
         CORBA::Object_var obj = orb->resolve_initial_references("NameService");
         CosNaming::NamingContext_var nameService = CosNaming::NamingContext::_narrow(obj);
 
-        // 2. Resolve o nome "Logger" publicado pelo servidor
+        // 2. Resolve o nome "Logger" publicado pelo servidor - o inverso
+        //    do rebind() feito em servidor.cpp.
         CosNaming::Name name;
         name.length(1);
         name[0].id = CORBA::string_dup("Logger");
@@ -29,6 +30,8 @@ int main(int argc, char* argv[])
             return 1;
         }
 
+        // Timestamp e pid reais deste processo cliente, usados nos
+        // eventos fictícios enviados abaixo.
         CORBA::ULong agora = static_cast<CORBA::ULong>(std::time(nullptr));
         CORBA::UShort pid = static_cast<CORBA::UShort>(getpid());
 
@@ -39,7 +42,8 @@ int main(int argc, char* argv[])
 
         // 3. Testa log() com dados fictícios, para diferentes severidades
         //    (deliberadamente sem nenhum evento WARNING, para exercitar a
-        //    exceção de locate() mais abaixo).
+        //    exceção de locate() mais abaixo). Como log() é oneway, cada
+        //    chamada retorna quase imediatamente, sem esperar o servidor.
         std::cout << "Enviando eventos ficticios do endereco " << meuEndereco << "..." << std::endl;
 
         logger->log(Logger::DEBUG,    meuEndereco, pid, agora,     "Conexao estabelecida");
@@ -55,6 +59,8 @@ int main(int argc, char* argv[])
         //    eventos recebidos (deve lançar Logger::NaoEncontrado).
         std::cout << "\nConsultando o ultimo endereco por severidade:" << std::endl;
 
+        // Lista auxiliar (severidade + nome em texto) só para não repetir
+        // o mesmo bloco de código quatro vezes abaixo.
         struct { Logger::TipoSeveridade valor; const char* nome; } severidades[] = {
             { Logger::DEBUG,    "DEBUG"    },
             { Logger::WARNING,  "WARNING"  },
@@ -66,6 +72,8 @@ int main(int argc, char* argv[])
         {
             try
             {
+                // locate() é síncrona: essa chamada espera a resposta do
+                // servidor antes de continuar.
                 CORBA::String_var endereco = logger->locate(s.valor);
                 std::cout << "  " << s.nome << " -> " << endereco.in() << std::endl;
             }
@@ -80,6 +88,8 @@ int main(int argc, char* argv[])
     }
     catch (const CORBA::TRANSIENT&)
     {
+        // Lançada quando o cliente não consegue nem abrir conexão -
+        // normalmente porque o servidor ainda não foi iniciado.
         std::cerr << "Nao foi possivel conectar (verifique se o servidor e o omniNames estao em execucao)." << std::endl;
         return 1;
     }

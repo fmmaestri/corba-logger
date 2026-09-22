@@ -3,26 +3,38 @@
 // - Vinicius Marcon
 // - Gustavo Muniz
 
+// Interface CORBA do servidor de log. Este arquivo é compilado pelo
+// omniidl (omniidl -bcxx Logger.idl), que gera automaticamente o stub
+// (usado pelo cliente) e o skeleton (usado pelo servidor) em C++.
 interface Logger
 {
+    // Restringe a severidade de um evento a um dos quatro valores abaixo,
+    // conforme pedido no enunciado. O tipo se chama TipoSeveridade (e não
+    // Severidade) porque o IDL não permite um tipo e um parâmetro com o
+    // mesmo nome diferindo só em maiúscula/minúscula.
     enum TipoSeveridade { DEBUG, WARNING, ERROR, CRITICAL };
 
+    // Exceção lançada por locate() quando não há nenhum evento registrado
+    // com a severidade pedida. Carrega uma mensagem explicativa.
     exception NaoEncontrado
     {
         string mensagem;
     };
 
     // Notificação assíncrona de um evento ocorrido em um cliente remoto.
+    // "oneway" torna a chamada fire-and-forget: o cliente não espera
+    // resposta, por isso só pode ter parâmetros "in" e retorno void.
     oneway void log(
         in TipoSeveridade severidade,
-        in string         endereco,
-        in unsigned short pid,
-        in unsigned long  hora,
-        in string         msg
+        in string         endereco,   // formato "ip:porta" de onde veio o evento
+        in unsigned short pid,        // pid do processo que gerou o evento
+        in unsigned long  hora,       // segundos desde 00:00:00 de 1/1/1970 (UTC)
+        in string         msg         // descrição livre do evento
     );
 
     // Retorna o endereço de origem do último evento recebido com a
     // severidade informada. Lança NaoEncontrado se nenhum evento com
-    // essa severidade tiver sido recebido ainda.
+    // essa severidade tiver sido recebido ainda. Ao contrário de log(),
+    // essa chamada é síncrona (o cliente espera a resposta).
     string locate(in TipoSeveridade severidade) raises (NaoEncontrado);
 };
